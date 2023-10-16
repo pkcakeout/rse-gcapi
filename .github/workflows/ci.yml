@@ -66,5 +66,16 @@ jobs:
           meson setup --prefix "$PWD/../openslide-install" --buildtype release --optimization 3 builddir
           meson compile -C builddir
           meson install -C builddir
+      - name: Build libvips
+        run: |
+          mkdir -p __deps
+          cd __deps
+          git clone https://github.com/libvips/libvips.git libvips
+          cd libvips
+          export PKG_CONFIG_PATH="$PWD/../openslide-install/lib/x86_64-linux-gnu/pkgconfig/"
+          meson setup build --buildtype release --optimization 3 --prefix "$PWD/../libvips-install" --default-library static
+          cd build
+          ninja all
+          meson install
       - name: Run tox
         run: tox
