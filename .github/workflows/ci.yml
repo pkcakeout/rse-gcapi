@@ -56,6 +56,20 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
+      - name: Install openslide and libvips dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja
+          sudo apt-get install -y libcairo2-dev libgdk-pixbuf2.0-dev libglib2.0-dev libjpeg-turbo8-dev libpng-dev libtiff-dev libxml2-dev libopenjp2-7-dev libsqlite3-dev libz3-dev
+      - name: Build openslide
+        run: |
+          mkdir -p __deps
+          cd __deps
+          git clone https://github.com/openslide/openslide.git openslide
+          cd openslide
+          meson setup --prefix "$PWD/../openslide-install" --buildtype release --optimization 3 builddir
+          meson compile -C builddir
+          meson install -C builddir
       - name: Pull the grand-challenge container images
         run: |
           sudo apt-get update
@@ -70,23 +84,3 @@ jobs:
         run: docker compose version
       - name: Run tox
         run: tox
-
-  deploy:
-    if: github.event_name == 'release'
-    needs: [precommit, build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Python ${{ env.MINIMUM_PYTHON_VERSION }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.MINIMUM_PYTHON_VERSION }}
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install poetry
-      - name: Upload to pypi
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
-        run: |
-          poetry publish --build
