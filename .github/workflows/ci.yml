@@ -54,7 +54,8 @@ jobs:
       - name: Install openslide and libvips dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y meson ninja
+          sudo apt-get install -y meson
+          python -m pip install ninja
           sudo apt-get install -y libcairo2-dev libgdk-pixbuf2.0-dev libglib2.0-dev libjpeg-turbo8-dev libpng-dev libtiff-dev libxml2-dev libopenjp2-7-dev libsqlite3-dev libz3-dev
       - name: Build openslide
         run: |
