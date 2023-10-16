@@ -77,5 +77,14 @@ jobs:
           cd build
           ninja all
           meson install
+      - name: Build pyvips
+        run: |
+          mkdir -p __deps
+          cd __deps
+          git clone https://github.com/libvips/pyvips.git pyvips
+          cd pyvips
+          export PKG_CONFIG_PATH="$PWD/../libvips-install/lib/x86_64-linux-gnu/pkgconfig/:$PWD/../openslide-install/lib/x86_64-linux-gnu/pkgconfig/"
+          python3 setup.py build
+          python3 setup.py install
       - name: Run tox
         run: tox
