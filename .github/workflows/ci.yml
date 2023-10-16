@@ -66,17 +66,5 @@ jobs:
           meson setup --prefix "$PWD/../openslide-install" --buildtype release --optimization 3 builddir
           meson compile -C builddir
           meson install -C builddir
-      - name: Pull the grand-challenge container images
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y retry
-          retry -t 5 -- /bin/bash -c 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/diag-nijmegen/grand-challenge/web'
-          retry -t 5 -- docker pull public.ecr.aws/diag-nijmegen/grand-challenge/web:latest
-          retry -t 5 -- /bin/bash -c 'aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/diag-nijmegen/grand-challenge/http'
-          retry -t 5 -- docker pull public.ecr.aws/diag-nijmegen/grand-challenge/http:latest
-      - name: Add gc.localhost to /etc/hosts
-        run: sudo echo "127.0.0.1 gc.localhost\n127.0.0.1 minio.localhost" | sudo tee -a /etc/hosts
-      - name: Find the docker compose version (should be at least 2.1.1 for --wait, everything works locally with 2.5.1, 2.4.1+azure-1 does not work)
-        run: docker compose version
       - name: Run tox
         run: tox
